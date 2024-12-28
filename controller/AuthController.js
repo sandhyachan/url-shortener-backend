@@ -1,10 +1,15 @@
 const { UserModel } = require('../model/UserModel')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
-const { sendActivationEmail } = require('../utils/EmailUtil')
+const { sendActivationEmail, sendPasswordResetEmail } = require('../utils/EmailUtil')
 
 // Generate random activation code
 const generateActivationCode = () => {
+    return crypto.randomBytes(3).toString('hex')
+}
+
+//Generate random reset token
+const generateResetToken = () => {
     return crypto.randomBytes(3).toString('hex')
 }
 
@@ -148,4 +153,36 @@ const userLogin = async (req, res) => {
     }
 }
 
-module.exports = { userRegistration, userAccountActivation, userLogin }
+// Forgot password function
+const forgotPassword = async (req, res) => {
+    const { email } = req.body
+
+    // Check if user exists
+    const user = await UserModel.findOne({ email })
+    if (!user) {
+        return res.status(404).json({ message: 'Account not found!' })
+    }
+
+    // Generate reset token and set expiration
+    const resetToken = generateResetToken()
+    const tokenExpiration = Date.now() + 3600000  // Token expires in 1 hour
+
+    user.resetToken = resetToken
+    user.tokenExpiration = tokenExpiration
+    await user.save()
+
+    try {
+        // Send password reset email
+        await sendPasswordResetEmail(email, resetToken)
+
+        return res.status(200).json({ message: 'Password reset email sent!' })
+    } catch (error) {
+        console.error('Error sending email:', error.res ? error.res.body : error.message)
+        return res.status(500).json({
+            message: 'Failed to send reset email. Please try again later.',
+            error: error.res ? error.res.body : error.message,
+        })
+    }
+}
+
+module.exports = { userRegistration, userAccountActivation, userLogin, forgotPassword }

@@ -49,4 +49,22 @@ const sendActivationEmail = async (email, firstName, activationCode) => {
     await sendGridMail.send(message)
 }
 
-module.exports = { sendActivationEmail }
+//Function to send email with token to reset password 
+const sendPasswordResetEmail = async (email, resetToken) => {
+    const resetLink = `https://localhost:3000/resetpassword`
+
+    const msg = {
+        to: email,
+        from: 'honeycoupleart@gmail.com',
+        subject: 'Password Reset Request',
+        text: `Click the link below to reset your password (this link will expire in 1 hour):\n\n${resetLink}. Copy your reset token from here for verification. ${resetToken}`,
+        html: `
+        <p>Click the link below to reset your password (this link will expire in 1 hour):</p>
+        <a href="${resetLink}">Reset Password</a>
+        <p>Copy your reset token from here for verification.</p>
+        <h6>${resetToken}</h6>`
+    }
+    await sendGridMail.send(msg)
+}
+
+module.exports = { sendActivationEmail, sendPasswordResetEmail }
