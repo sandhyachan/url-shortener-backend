@@ -102,4 +102,50 @@ const userAccountActivation = async (req, res) => {
 
 }
 
-module.exports = { userRegistration, userAccountActivation }
+//User Login Function
+const userLogin = async (req, res) => {
+    const { email, password } = req.body
+
+    if (!email || !password) {
+        return res.status(400).json({
+            message: "Bad Credentials"
+        })
+    }
+    try {
+        const userExist = await UserModel.findOne({ email })
+
+        //Check if user exists
+        if (!userExist) {
+            return res.status(404).json({
+                message: "Account not found"
+            })
+        }
+
+        //Check if user's account status is active
+        if (userExist.accountStatus === 'inactive') {
+            return res.status(403).json({
+                message: "Please activate your account. Check your email for the activation code."
+            })
+        }
+
+        //Check if the password is valid
+        const isPasswordValid = await bcrypt.compare(password, userExist.password)
+        if (!isPasswordValid) {
+            return res.status(400).json({
+                message: "Bad Credentials"
+            })
+        }
+        return res.status(200).json({
+            message: "Login successful"
+        })
+
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            message: "Something went wrong",
+            error: error.message
+        })
+    }
+}
+
+module.exports = { userRegistration, userAccountActivation, userLogin }
