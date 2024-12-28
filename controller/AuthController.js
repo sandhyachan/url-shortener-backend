@@ -51,11 +51,9 @@ const userRegistration = async (req, res) => {
         const result = await newUser.save()
 
         const activationCode = generateActivationCode()
-        const codeExpiration = Date.now() + 3600000 // 1 hour expiration
 
-        // Save activation code and expiration time
+        // Save activation code
         newUser.activationCode = activationCode
-        newUser.codeExpiration = codeExpiration
         await newUser.save()
 
         // Send activation email to the user
@@ -72,6 +70,36 @@ const userRegistration = async (req, res) => {
             error: error.message
         })
     }
+}
+
+//User Account Activation
+const userAccountActivation = async (req, res) => {
+    const { activationCode } = req.body
+    try {
+        const user = await UserModel.findOne({ activationCode })
+    
+        //Check if user exists or the code is valid
+        if(!user){
+            return res.status(404).json({ message: 'Invalid activation code!'})
+        }
+    
+        //Check if  account is already active
+        if(user.accountStatus === 'active'){
+            return res.status(400).json({ message: 'Account is already activated.' })
+        }
+    
+        //Save account status
+        user.accountStatus = 'active'
+        user.activationCode = undefined
+    
+        //Save updated user
+        await user.save()
+        return res.status(200).json({ message: 'Account activation successful!' })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: 'Something went wrong during activation.', error: error.message })
+    }
+
 }
 
 module.exports = { userRegistration, userAccountActivation }

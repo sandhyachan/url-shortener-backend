@@ -27,10 +27,11 @@ const UserSchema = mongoose.Schema({
         type: String, 
         required: false 
     },
-    codeExpiration: { 
-        type: Date, 
-        required: false 
-    },
+    accountStatus: {
+        type: String,
+        enum: ['inactive', 'active'],
+        default: 'inactive'
+    }
 })
 
 const UserModel = mongoose.model('users', UserSchema)

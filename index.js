@@ -1,9 +1,10 @@
 const express = require('express')
 const cors = require('cors')
 const { connectDB } = require('./dbConfig')
-const { userRegistration } = require('./controller/AuthController')
+const { userRegistration, userAccountActivation } = require('./controller/AuthController')
 const { UserModel } = require('./model/UserModel')
 const server = express()
+const PORT = 3004
 
 connectDB()
 
@@ -13,6 +14,8 @@ server.use(cors())
 
 //ROUTE HANDLERS
 server.post('/registration', userRegistration)
+
+server.post('/activation', userAccountActivation)
 
 //Endpoint to fetch all users
 server.get('/users', async (request, response) => {
@@ -31,6 +34,6 @@ server.get('/users', async (request, response) => {
 })
 
 // Start the server
-server.listen(3000, () => {
-    console.log("Server is running on http://localhost:3000")
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`)
 })
