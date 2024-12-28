@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const { connectDB } = require('./dbConfig')
 const { userRegistration } = require('./controller/Auth.Controller')
+const { UserModel } = require('./model/User.Model')
 const server = express()
 
 connectDB()

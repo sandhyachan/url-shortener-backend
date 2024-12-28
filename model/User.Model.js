@@ -23,14 +23,14 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: false
     },
-    resetToken: { 
+    activationCode: { 
         type: String, 
         required: false 
     },
-    tokenExpiration: { 
+    codeExpiration: { 
         type: Date, 
         required: false 
-    }
+    },
 })
 
 const UserModel = mongoose.model('users', UserSchema)
