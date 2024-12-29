@@ -13,6 +13,7 @@ const generateResetToken = () => {
     return crypto.randomBytes(3).toString('hex')
 }
 
+
 // User Registration function
 const userRegistration = async (req, res) => {
     const { email, password, firstName, lastName, phoneNumber } = req.body
@@ -77,6 +78,7 @@ const userRegistration = async (req, res) => {
     }
 }
 
+
 //User Account Activation
 const userAccountActivation = async (req, res) => {
     const { activationCode } = req.body
@@ -106,6 +108,7 @@ const userAccountActivation = async (req, res) => {
     }
 
 }
+
 
 //User Login Function
 const userLogin = async (req, res) => {
@@ -153,8 +156,9 @@ const userLogin = async (req, res) => {
     }
 }
 
+
 // Forgot password function
-const forgotPassword = async (req, res) => {
+const userForgotPassword = async (req, res) => {
     const { email } = req.body
 
     // Check if user exists
@@ -165,7 +169,7 @@ const forgotPassword = async (req, res) => {
 
     // Generate reset token and set expiration
     const resetToken = generateResetToken()
-    const tokenExpiration = Date.now() + 3600000  // Token expires in 1 hour
+    const tokenExpiration = Date.now() + 3800000  // Token expires in 1 hour
 
     user.resetToken = resetToken
     user.tokenExpiration = tokenExpiration
@@ -185,4 +189,40 @@ const forgotPassword = async (req, res) => {
     }
 }
 
-module.exports = { userRegistration, userAccountActivation, userLogin, forgotPassword }
+
+//User password reset function
+const userResetPassword = async (req, res) => {
+    const { token, newPassword, confirmPassword } = req.body
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    // Check if token is valid
+    const user = await UserModel.findOne({ resetToken: token })
+    if (!user) {
+        return res.status(404).json({ message: 'Invalid or expired reset token!'})
+    }
+
+    //Check if token has expired
+    if (Date.now() > user.tokenExpiration) {
+        return res.status(400).json({ message: 'Reset token has expired!'})
+    }
+
+    //Validate new password
+    if (newPassword.length<8) {
+        return res.status(400).json({ message: 'Passwords must have atleast 8 characters!'})
+    }
+
+    //Ensure new password match
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: 'Passwords do not match!'})
+    }
+
+    //Reset password and clear token data
+    user.password = hashedPassword 
+    user.resetToken = undefined 
+    user.tokenExpiration = undefined 
+    await user.save()
+
+    return res.status(200).json({ message: 'Password reset successful!' })
+}
+
+module.exports = { userRegistration, userAccountActivation, userLogin, userForgotPassword, userResetPassword }

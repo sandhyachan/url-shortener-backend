@@ -31,6 +31,14 @@ const UserSchema = mongoose.Schema({
         type: String,
         enum: ['inactive', 'active'],
         default: 'inactive'
+    },
+    resetToken: { 
+        type: String, 
+        required: false 
+    },
+    tokenExpiration: { 
+        type: Date, 
+        required: false 
     }
 })
 

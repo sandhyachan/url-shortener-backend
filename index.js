@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const { connectDB } = require('./dbConfig')
-const { userRegistration, userAccountActivation, userLogin, forgotPassword } = require('./controller/AuthController')
+const { userRegistration, userAccountActivation, userLogin, userForgotPassword, userResetPassword } = require('./controller/AuthController')
 const { UserModel } = require('./model/UserModel')
 const server = express()
 const PORT = 3000
@@ -19,7 +19,9 @@ server.post('/activation', userAccountActivation)
 
 server.post('/login', userLogin)
 
-server.post('/forgotpassword', forgotPassword)
+server.post('/forgotpassword', userForgotPassword)
+
+server.post('/resetpassword', userResetPassword)
 
 //Endpoint to fetch all users
 server.get('/users', async (request, response) => {
