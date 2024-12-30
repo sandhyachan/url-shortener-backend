@@ -25,7 +25,8 @@ const UserSchema = mongoose.Schema({
     },
     activationCode: { 
         type: String, 
-        required: false 
+        required: false,
+        unique: true
     },
     accountStatus: {
         type: String,
@@ -40,7 +41,7 @@ const UserSchema = mongoose.Schema({
         type: Date, 
         required: false 
     }
-})
+}, { timestamps: true})
 
 const UserModel = mongoose.model('users', UserSchema)
 
