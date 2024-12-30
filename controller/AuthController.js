@@ -1,7 +1,8 @@
-const { UserModel } = require('../model/UserModel')
+const { UserModel } = require('../models/UserModel')
 const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
 const { sendActivationEmail, sendPasswordResetEmail } = require('../utils/EmailUtil')
+const { generateJwtToken } = require('../utils/JwtUtil')
 
 // Generate random activation code
 const generateActivationCode = () => {
@@ -116,7 +117,7 @@ const userLogin = async (req, res) => {
 
     if (!email || !password) {
         return res.status(400).json({
-            message: "Bad Credentials"
+            message: "Bad Credentials: Missing email or password"
         })
     }
     try {
@@ -140,11 +141,14 @@ const userLogin = async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, userExist.password)
         if (!isPasswordValid) {
             return res.status(400).json({
-                message: "Bad Credentials"
+                message: "Bad Credentials: Incorrect password"
             })
         }
+
         return res.status(200).json({
-            message: "Login successful"
+            message: "Login successful",
+            success: true,
+            token: generateJwtToken({ userId: userExist._id })
         })
 
     } catch (error) {
