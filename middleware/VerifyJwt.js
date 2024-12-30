@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 function verifyJwtToken(req, res, next) {
-    const token = req.header('Authorization')?.replace('Bearer', '')
+    const token = req.header('Authorization')?.replace('Bearer', '').trim()
 
     if(!token){
         return res.status(401).json({ message: 'Please log in.'})

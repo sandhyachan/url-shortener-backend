@@ -4,7 +4,15 @@ const mongoose = require('mongoose')
 const UrlSchema = mongoose.Schema({
     longUrl: {
         type: String,
-        required: true
+        required: true,
+        validate: {
+            validator: function(v) {
+                // URL validation
+                const regex = /^(http|https):\/\/[^ "]+$/;
+                return regex.test(v);
+            },
+            message: 'Invalid URL format!'
+        }
     },
     shortUrl: {
         type: String,
@@ -20,7 +28,7 @@ const UrlSchema = mongoose.Schema({
         ref: 'users', 
         required: true
     }
-})
+}, { timestamps: true })
 
 const UrlModel = mongoose.model('url', UrlSchema)
 
