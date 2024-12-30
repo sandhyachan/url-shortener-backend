@@ -2,7 +2,9 @@ const express = require('express')
 const cors = require('cors')
 const { connectDB } = require('./dbConfig')
 const { userRegistration, userAccountActivation, userLogin, userForgotPassword, userResetPassword } = require('./controller/AuthController')
-const { UserModel } = require('./model/UserModel')
+const { createShortUrl, redirectToLongUrl } = require('./controller/UrlController')
+const { UserModel } = require('./models/UserModel')
+const { verifyJwtToken } = require('./middleware/VerifyJwt')
 const server = express()
 const PORT = 3000
 
@@ -12,19 +14,9 @@ connectDB()
 server.use(express.json())
 server.use(cors())
 
-//ROUTE HANDLERS
-server.post('/registration', userRegistration)
-
-server.post('/activation', userAccountActivation)
-
-server.post('/login', userLogin)
-
-server.post('/forgotpassword', userForgotPassword)
-
-server.post('/resetpassword', userResetPassword)
-
 //Endpoint to fetch all users
 server.get('/users', async (request, response) => {
+    console.log("Request URL:", request.url)
     try {
         const result = await UserModel.find()
         response.status(200).json({
@@ -38,6 +30,25 @@ server.get('/users', async (request, response) => {
         })
     }
 })
+
+//ROUTE HANDLERS
+server.post('/registration', userRegistration)
+
+server.post('/activation', userAccountActivation)
+
+server.post('/login', userLogin)
+
+server.post('/forgotpassword', userForgotPassword)
+
+server.post('/resetpassword', userResetPassword)
+
+server.use(verifyJwtToken)
+
+// Create a new short URL
+server.post('/shorten-url', verifyJwtToken, createShortUrl)
+
+// Redirect from short to long URL
+server.get('/:shortUrl', redirectToLongUrl)
 
 // Start the server
 server.listen(PORT, () => {

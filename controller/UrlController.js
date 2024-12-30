@@ -41,7 +41,7 @@ const createShortUrl = async (req, res) => {
             message: 'Short URL created successfully!',
             data: {
                 longUrl: savedUrl.longUrl,
-                shortUrl: savedUrl.shortUrl
+                shortUrl: `http:localhost:3000/${savedUrl.shortUrl}`
             }
         })
 
