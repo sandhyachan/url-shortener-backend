@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const { connectDB } = require('./dbConfig')
 const { userRegistration, userAccountActivation, userLogin, userForgotPassword, userResetPassword } = require('./controller/AuthController')
-const { createShortUrl, redirectToLongUrl } = require('./controller/UrlController')
+const { createShortUrl, redirectToLongUrl, getDashboardStatistics, getAllUrlsForUser } = require('./controller/UrlController')
 const { UserModel } = require('./models/UserModel')
 const { verifyJwtToken } = require('./middleware/VerifyJwt')
 const server = express()
@@ -45,10 +45,17 @@ server.post('/resetpassword', userResetPassword)
 server.use(verifyJwtToken)
 
 // Create a new short URL
-server.post('/shorten-url', verifyJwtToken, createShortUrl)
+server.post('/shorten-url', createShortUrl)
 
 // Redirect from short to long URL
 server.get('/:shortUrl', redirectToLongUrl)
+
+server.get('/all-urls', verifyJwtToken, getAllUrlsForUser)
+
+server.use(verifyJwtToken)
+
+server.get('/dashboard/statistics', verifyJwtToken, getDashboardStatistics)
+
 
 // Start the server
 server.listen(PORT, () => {
